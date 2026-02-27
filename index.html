@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FaithLens — Every Tradition, One Question</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0d0d0f;
+    --surface:   #13131a;
+    --card:      #1a1a24;
+    --border:    rgba(255,255,255,0.07);
+    --text:      #e8e4dc;
+    --muted:     #7a7585;
+    --accent:    #c8a96e;
+    --accent2:   #7e9cb8;
+
+    /* Religion accent colors */
+    --christian: #8bbcd4;
+    --islam:     #5daa8f;
+    --judaism:   #c4a84f;
+    --hinduism:  #d47c5a;
+    --buddhism:  #c4904f;
+    --sikhism:   #7eaad4;
+    --taoism:    #a0c4a0;
+    --secular:   #a09ab8;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Light theme overrides */
+  body.theme-light {
+    --bg:        #f5f3ee;
+    --surface:   #ffffff;
+    --card:      #ffffff;
+    --border:    rgba(0,0,0,0.06);
+    --text:      #231c17;
+    --muted:     #6b6675;
+    --accent:    #b48035;
+    --accent2:   #4f6aa0;
+
+    --christian: #386a9b;
+    --islam:     #2f7a5c;
+    --judaism:   #947021;
+    --hinduism:  #b15930;
+    --buddhism:  #a26a28;
+    --sikhism:   #4f76a8;
+    --taoism:    #5b8f5b;
+    --secular:   #5d5775;
+  }
+
+  /* Subtle grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(13,13,15,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .logo-mark {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .logo-mark span {
+    color: var(--accent);
+  }
+
+  .logo-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .tradition-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 20px;
+    border: 1px solid;
+    opacity: 0.5;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s, transform 0.12s;
+  }
+
+  .pill:hover {
+    opacity: 0.8;
+    transform: translateY(-1px);
+  }
+
+  .pill-active {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.12);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .theme-toggle {
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .theme-toggle-icon {
+    font-size: 12px;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 65px);
+  }
+
+  /* ── CONVERSATION FEED ── */
+  #feed {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    scroll-behavior: smooth;
+  }
+
+  #feed::-webkit-scrollbar { width: 4px; }
+  #feed::-webkit-scrollbar-track { background: transparent; }
+  #feed::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    gap: 20px;
+    animation: fadeIn 0.8s ease;
+  }
+
+  .empty-symbol {
+    font-size: 48px;
+    opacity: 0.15;
+    letter-spacing: 8px;
+  }
+
+  .empty-title {
+    font-size: 32px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text);
+    opacity: 0.8;
+  }
+
+  .empty-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    max-width: 380px;
+    line-height: 1.8;
+  }
+
+  .suggestion-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+    max-width: 560px;
+  }
+
+  .chip {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface);
+  }
+
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(200,169,110,0.05);
+  }
+
+  /* ── EXCHANGE BLOCK ── */
+  .exchange {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: slideUp 0.4s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .user-bubble {
+    align-self: flex-end;
+    max-width: 560px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px 16px 4px 16px;
+    padding: 14px 18px;
+    font-size: 17px;
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .response-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding-left: 4px;
+  }
+
+  /* ── RELIGION GRID ── */
+  .religion-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .religion-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .religion-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--rcolor);
+    opacity: 0.7;
+  }
+
+  .religion-card:hover { border-color: rgba(255,255,255,0.14); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .card-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--rcolor);
+  }
+
+  .card-body {
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--text);
+    opacity: 0.9;
+  }
+
+  .card-scripture {
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .card-scripture cite {
+    display: block;
+    font-style: normal;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--rcolor);
+    opacity: 0.7;
+    margin-top: 5px;
+  }
+
+  /* ── LOADING STATE ── */
+  .loading-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .skeleton-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skeleton-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%);
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(100%); }
+  }
+
+  .skel-line {
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.05);
+    margin-bottom: 10px;
+  }
+
+  /* ── INPUT BAR ── */
+  #input-bar {
+    padding: 16px 24px 24px;
+    border-top: 1px solid var(--border);
+    background: rgba(13,13,15,0.95);
+    backdrop-filter: blur(12px);
+  }
+
+  .input-wrap {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    max-width: 960px;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 16px;
+    transition: border-color 0.2s;
+  }
+
+  .input-wrap:focus-within {
+    border-color: rgba(200,169,110,0.35);
+  }
+
+  #question {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    resize: none;
+    max-height: 120px;
+    min-height: 28px;
+  }
+
+  #question::placeholder {
+    color: var(--muted);
+    opacity: 0.6;
+  }
+
+  #send-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  #send-btn:hover { background: #d9bc82; transform: scale(1.04); }
+  #send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+  #send-btn svg { width: 16px; height: 16px; fill: #0d0d0f; }
+
+  .input-hint {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 8px;
+    letter-spacing: 0.08em;
+    opacity: 0.5;
+  }
+
+  /* ── SCROLLBAR HIDE ── */
+  .religion-grid::-webkit-scrollbar { display: none; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 10px 24px 14px;
+    background: #0b0b0e;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    display: flex;
+    justify-content: center;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+  }
+
+  .footer-links a {
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .footer-links a:hover {
+    color: var(--accent);
+  }
+
+  /* Light theme layout tweaks */
+  body.theme-light header {
+    background: rgba(245,243,238,0.96);
+    border-bottom-color: rgba(0,0,0,0.06);
+  }
+
+  body.theme-light #input-bar {
+    background: rgba(245,243,238,0.96);
+    border-top-color: rgba(0,0,0,0.06);
+  }
+
+  body.theme-light footer {
+    background: #f0ede7;
+    border-top-color: rgba(0,0,0,0.06);
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 14px 16px; }
+    .tradition-pills { display: none; }
+    #feed { padding: 20px 14px; }
+    #input-bar { padding: 12px 14px 20px; }
+    .religion-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">Faith<span>Lens</span></div>
+    <div class="logo-sub">Many religions. One question.</div>
+  </div>
+  <div class="header-right">
+    <div class="tradition-pills">
+      <div class="pill" data-tradition-id="christianity" style="color:var(--christian);border-color:var(--christian)">✝ Christian</div>
+      <div class="pill" data-tradition-id="islam" style="color:var(--islam);border-color:var(--islam)">☪ Islam</div>
+      <div class="pill" data-tradition-id="judaism" style="color:var(--judaism);border-color:var(--judaism)">✡ Judaism</div>
+      <div class="pill" data-tradition-id="hinduism" style="color:var(--hinduism);border-color:var(--hinduism)">ॐ Hindu</div>
+      <div class="pill" data-tradition-id="buddhism" style="color:var(--buddhism);border-color:var(--buddhism)">☸ Buddhist</div>
+      <div class="pill" data-tradition-id="sikhism" style="color:var(--sikhism);border-color:var(--sikhism)">☬ Sikh</div>
+      <div class="pill" data-tradition-id="taoism" style="color:var(--taoism);border-color:var(--taoism)">☯ Taoist</div>
+      <div class="pill" data-tradition-id="secular" style="color:var(--secular);border-color:var(--secular)">◈ Secular</div>
+    </div>
+    <button id="theme-toggle" class="theme-toggle" type="button">
+      <span id="theme-toggle-icon" class="theme-toggle-icon">☾</span>
+      <span id="theme-toggle-label">Dark</span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <div id="feed">
+    <div class="empty-state" id="empty">
+      <div class="empty-symbol">✝ ☪ ✡ ॐ ☸</div>
+      <div class="empty-title">Ask anything that weighs on you.</div>
+      <div class="empty-sub">Eight religions respond simultaneously — scripture grounded, plainly spoken. Compare and contrast. Draw your own conclusions.</div>
+      <div class="suggestion-chips">
+        <div class="chip" onclick="ask(this.textContent)">Why do bad things happen to good people?</div>
+        <div class="chip" onclick="ask(this.textContent)">How do I find purpose in suffering?</div>
+        <div class="chip" onclick="ask(this.textContent)">What happens after we die?</div>
+        <div class="chip" onclick="ask(this.textContent)">How should I treat my enemies?</div>
+        <div class="chip" onclick="ask(this.textContent)">Is there such a thing as fate?</div>
+        <div class="chip" onclick="ask(this.textContent)">What is the nature of God?</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="input-bar">
+    <div class="input-wrap">
+      <textarea id="question" placeholder="Ask a question of faith, ethics, or meaning..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button id="send-btn" onclick="submit()" title="Send">
+        <svg viewBox="0 0 24 24"><path d="M2 21L23 12 2 3v7l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="input-hint">Eight religions respond simultaneously · Responses cite primary scripture</div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-links">
+    <a href="/privacy.html">Privacy Policy</a>
+    <span>·</span>
+    <a href="/terms.html">Terms of Service</a>
+  </div>
+</footer>
+
+<script>
+const TRADITIONS = [
+  {
+    id: 'christianity',
+    name: 'Christianity',
+    icon: '✝',
+    color: 'var(--christian)',
+    texts: 'Bible (Old & New Testament)',
+  },
+  {
+    id: 'islam',
+    name: 'Islam',
+    icon: '☪',
+    color: 'var(--islam)',
+    texts: 'Quran & Hadith',
+  },
+  {
+    id: 'judaism',
+    name: 'Judaism',
+    icon: '✡',
+    color: 'var(--judaism)',
+    texts: 'Torah, Talmud & Tanakh',
+  },
+  {
+    id: 'hinduism',
+    name: 'Hinduism',
+    icon: 'ॐ',
+    color: 'var(--hinduism)',
+    texts: 'Bhagavad Gita, Upanishads & Vedas',
+  },
+  {
+    id: 'buddhism',
+    name: 'Buddhism',
+    icon: '☸',
+    color: 'var(--buddhism)',
+    texts: 'Pali Canon & Dhammapada',
+  },
+  {
+    id: 'sikhism',
+    name: 'Sikhism',
+    icon: '☬',
+    color: 'var(--sikhism)',
+    texts: 'Guru Granth Sahib',
+  },
+  {
+    id: 'taoism',
+    name: 'Taoism',
+    icon: '☯',
+    color: 'var(--taoism)',
+    texts: 'Tao Te Ching & Zhuangzi',
+  },
+  {
+    id: 'secular',
+    name: 'Secular / Philosophical',
+    icon: '◈',
+    color: 'var(--secular)',
+    texts: 'Stoic, Existentialist & Humanist thought',
+  },
+];
+
+let isLoading = false;
+let activeTraditionIds = new Set(TRADITIONS.map(t => t.id));
+
+function initTraditionFilters() {
+  const pills = document.querySelectorAll('.tradition-pills .pill[data-tradition-id]');
+  pills.forEach(pill => {
+    const id = (pill.getAttribute('data-tradition-id') || '').toLowerCase();
+    if (!id) return;
+    if (activeTraditionIds.has(id)) {
+      pill.classList.add('pill-active');
+    }
+    pill.addEventListener('click', () => toggleTradition(id, pill));
+  });
+}
+
+function toggleTradition(id, pillEl) {
+  // Ensure at least one tradition remains selected.
+  if (activeTraditionIds.has(id) && activeTraditionIds.size === 1) {
+    return;
+  }
+
+  if (activeTraditionIds.has(id)) {
+    activeTraditionIds.delete(id);
+    pillEl.classList.remove('pill-active');
+  } else {
+    activeTraditionIds.add(id);
+    pillEl.classList.add('pill-active');
+  }
+
+  // Re-filter any already-rendered exchanges so the UI updates immediately.
+  updateVisibleTraditions();
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    submit();
+  }
+}
+
+async function ask(text) {
+  document.getElementById('question').value = text;
+  submit();
+}
+
+async function submit() {
+  if (isLoading) return;
+  const input = document.getElementById('question');
+  const question = input.value.trim();
+  if (!question) return;
+
+  isLoading = true;
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('send-btn').disabled = true;
+
+  // Hide empty state
+  const empty = document.getElementById('empty');
+  if (empty) empty.remove();
+
+  const feed = document.getElementById('feed');
+
+  // User bubble
+  const exchange = document.createElement('div');
+  exchange.className = 'exchange';
+  exchange.innerHTML = `<div class="user-bubble">${escHtml(question)}</div>`;
+  feed.appendChild(exchange);
+
+  // Loading skeletons
+  const loadingWrap = document.createElement('div');
+  loadingWrap.innerHTML = `
+    <div class="response-label" style="margin-bottom:10px">Eight religions responding...</div>
+    <div class="loading-grid">
+      ${TRADITIONS.map(trad => activeTraditionIds.has(trad.id) ? `
+        <div class="skeleton-card religion-card" data-tradition-id="${trad.id}">
+          <div class="skel-line" style="width:40%;margin-bottom:14px"></div>
+          <div class="skel-line" style="width:100%"></div>
+          <div class="skel-line" style="width:90%"></div>
+          <div class="skel-line" style="width:75%"></div>
+          <div class="skel-line" style="width:100%;margin-top:14px"></div>
+          <div class="skel-line" style="width:60%"></div>
+        </div>` : '').join('')}
+    </div>`;
+  exchange.appendChild(loadingWrap);
+  feed.scrollTop = feed.scrollHeight;
+
+  try {
+    const data = await callFaithlensApi(question);
+    loadingWrap.remove();
+
+    const grid = document.createElement('div');
+    grid.className = 'religion-grid';
+
+    const tradMap = {};
+    if (data && data.traditions) {
+      data.traditions.forEach(t => tradMap[(t.id || '').toLowerCase()] = t);
+    }
+
+    // Render all traditions in canonical order; visibility is controlled by filters.
+    TRADITIONS.forEach(trad => {
+      const td = tradMap[trad.id] || {};
+      const card = document.createElement('div');
+      card.className = 'religion-card';
+      card.setAttribute('data-tradition-id', trad.id);
+      card.style.setProperty('--rcolor', trad.color);
+      card.innerHTML = `
+        <div class="card-header">
+          <span class="card-icon">${trad.icon}</span>
+          <span class="card-name">${trad.name}</span>
+        </div>
+        <div class="card-body">${escHtml(td.response || 'Response unavailable.')}</div>
+        ${td.quote ? `
+        <div class="card-scripture">
+          "${escHtml(td.quote)}"
+          <cite>${escHtml(td.citation || '')}</cite>
+        </div>` : ''}`;
+      grid.appendChild(card);
+    });
+
+    const label = document.createElement('div');
+    label.className = 'response-label';
+    label.style.marginBottom = '10px';
+    label.setAttribute('data-base-question', question);
+    exchange.appendChild(label);
+    // Set initial label text based on current filter.
+    updateExchangeLabel(label);
+    exchange.appendChild(grid);
+    // Ensure cards honour current filter immediately.
+    updateVisibleTraditions();
+
+  } catch (err) {
+    loadingWrap.innerHTML = `<div style="color:var(--muted);font-size:14px;padding:12px;font-family:'DM Mono',monospace">
+      Error fetching responses. This app can run in <strong style="color:var(--accent)">Demo mode</strong> until you add a Cloudflare secret for the API key.
+      <br><br>
+      Demo mode is currently active.
+    </div>`;
+    console.error(err);
+  }
+
+  isLoading = false;
+  document.getElementById('send-btn').disabled = false;
+  feed.scrollTop = feed.scrollHeight;
+}
+
+async function callFaithlensApi(question) {
+  // Prefer backend (Cloudflare Pages Function) to keep API keys private.
+  // If backend is unavailable (or key not set), fall back to demo samples.
+  try {
+    const resp = await fetch('/api/faithlens', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question }),
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data && Array.isArray(data.traditions)) return data;
+    }
+  } catch (_) {}
+
+  return await demoFaithlens(question);
+}
+
+async function demoFaithlens(question) {
+  await new Promise(r => setTimeout(r, 900)); // simulate latency
+
+  const samples = {
+    "Why do bad things happen to good people?": {
+      traditions: [
+        { id: "christianity", response: "Christianity acknowledges the profound mystery of suffering. God is not the author of evil, but He permits it within a fallen world to accomplish purposes beyond our sight. The cross itself is God's answer — not an explanation of pain, but His presence within it. Romans teaches that suffering produces perseverance, character, and hope.", quote: "We also glory in our sufferings, because we know that suffering produces perseverance; perseverance, character; and character, hope.", citation: "Romans 5:3-4 (NIV)" },
+        { id: "islam", response: "Islam teaches that suffering is a test (fitna) and a purification from God. No hardship befalls a believer without it becoming an expiation for sin or a raising of rank before Allah. Patience (sabr) is the prescribed response — not passive resignation, but active trust in divine wisdom. Allah does not burden a soul beyond its capacity.", quote: "Allah does not burden a soul beyond that it can bear.", citation: "Quran 2:286" },
+        { id: "judaism", response: "Judaism sits with the question honestly — Job is its paradigmatic text. Tzaddik she-ra lo (the righteous who suffer) is not explained away. The tradition affirms that God's ways are beyond full comprehension, but also permits — even demands — arguing with God. Suffering can refine, can build empathy, and can draw one closer to the Divine.", quote: "Where were you when I laid the foundation of the earth? Tell me, if you have understanding.", citation: "Job 38:4 (ESV)" },
+        { id: "hinduism", response: "Hinduism understands suffering through the lens of karma and dharma. What appears unjust in this life reflects causes set in motion across many lifetimes. The Bhagavad Gita counsels equanimity — the soul (atman) is eternal and cannot be harmed. Suffering in the material world (maya) is real but transient, a classroom for the soul's evolution.", quote: "The soul is never born nor dies at any time. It has not come into being, does not come into being, and will not come into being. It is unborn, eternal, ever-existing, and primeval.", citation: "Bhagavad Gita 2:20" },
+        { id: "buddhism", response: "Buddhism begins with the First Noble Truth: dukkha (suffering, unsatisfactoriness) is the nature of conditioned existence. It does not punish or reward — it simply is. Suffering arises from attachment and craving. The path forward is not to explain why good people suffer but to understand the nature of suffering itself and practice the Eightfold Path toward liberation.", quote: "All conditioned things are impermanent. When one sees this with wisdom, one turns away from suffering.", citation: "Dhammapada 277" },
+        { id: "sikhism", response: "Sikh teaching holds that all that occurs is within the Will (Hukam) of Waheguru. Hardship is not punishment but part of the divine design meant to bring the soul closer to God. Suffering dissolves ego and cultivates humility, compassion, and Nam Simran (remembrance of God). The righteous who suffer are often being prepared for deeper service.", quote: "Whatever pleases You is good, O Lord; this alone I know.", citation: "Guru Granth Sahib, Ang 745" },
+        { id: "taoism", response: "Taoism questions the premise itself. What appears as 'bad' from a human vantage point may serve the balance of the whole. The Tao moves in cycles — hardship and ease, loss and gain, are equally necessary. The sage does not rage against misfortune or cling to fortune. By flowing with what is, suffering becomes a teacher rather than an injustice.", quote: "Misfortune is what fortune depends upon; fortune is what misfortune hides in.", citation: "Tao Te Ching, Chapter 58" },
+        { id: "secular", response: "Stoicism addresses this directly: what happens to us is not within our control, only our response is. Viktor Frankl, who survived Auschwitz, argued that suffering need not destroy meaning — in fact, choosing one's attitude toward unavoidable suffering is the last human freedom. There is no cosmic guarantee of fairness, but there is always the capacity to respond with dignity.", quote: "Between stimulus and response there is a space. In that space is our power to choose our response.", citation: "Viktor Frankl, Man's Search for Meaning" }
+      ]
+    }
+  };
+
+  if (samples[question]) return samples[question];
+
+  return {
+    traditions: TRADITIONS.map(t => ({
+      id: t.id,
+      response: `The ${t.name} tradition offers rich perspective on this question, drawing from its primary scriptures and centuries of interpretation. To receive live, scripture-grounded responses, add the API key secret in Cloudflare and the backend will answer here.`,
+      quote: `Demo mode note: connect live AI to return primary-text quotes from ${t.texts}.`,
+      citation: `Demo mode`
+    }))
+  };
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function updateVisibleTraditions() {
+  const exchanges = document.querySelectorAll('.exchange');
+  exchanges.forEach(exchange => {
+    const grid = exchange.querySelector('.religion-grid');
+    const loadingGrid = exchange.querySelector('.loading-grid');
+    if (!grid && !loadingGrid) return;
+
+    const cards = grid ? grid.querySelectorAll('.religion-card') : [];
+    const loadingCards = loadingGrid ? loadingGrid.querySelectorAll('.religion-card') : [];
+    let visibleCount = 0;
+    [...cards, ...loadingCards].forEach(cardEl => {
+      const card = /** @type {HTMLElement} */ (cardEl);
+      const id = (card.getAttribute('data-tradition-id') || '').toLowerCase();
+      if (id && activeTraditionIds.has(id)) {
+        card.style.display = '';
+        visibleCount += 1;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    const label = /** @type {HTMLElement | null} */ (exchange.querySelector('.response-label'));
+    if (label) {
+      // Only relabel completed exchanges that have a stored question.
+      if (label.hasAttribute('data-base-question')) {
+        updateExchangeLabel(label, visibleCount);
+      } else if (visibleCount > 0) {
+        const countText = visibleCount === TRADITIONS.length ? 'Eight religions' : `${visibleCount} religion${visibleCount === 1 ? '' : 's'}`;
+        label.textContent = `${countText} responding...`;
+      }
+    }
+  });
+}
+
+function updateExchangeLabel(labelEl, countOverride) {
+  const question = labelEl.getAttribute('data-base-question') || '';
+  const count = typeof countOverride === 'number' ? countOverride : activeTraditionIds.size;
+  const countText = count === TRADITIONS.length ? 'Eight religions' : `${count} religion${count === 1 ? '' : 's'}`;
+  labelEl.textContent = `${countText} on: "` + question.substring(0, 60) + (question.length > 60 ? '..."' : '"');
+}
+
+// Initialize filters once DOM is ready so the header pills are interactive.
+document.addEventListener('DOMContentLoaded', () => {
+  initTraditionFilters();
+  initThemeToggle();
+});
+
+function initThemeToggle() {
+  const stored = (localStorage.getItem('faithlens-theme') || '').toLowerCase();
+  if (stored === 'light') {
+    document.body.classList.add('theme-light');
+  }
+
+  updateThemeToggleButton();
+
+  const btn = document.getElementById('theme-toggle');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      document.body.classList.toggle('theme-light');
+      const mode = document.body.classList.contains('theme-light') ? 'light' : 'dark';
+      try {
+        localStorage.setItem('faithlens-theme', mode);
+      } catch {}
+      updateThemeToggleButton();
+    });
+  }
+}
+
+function updateThemeToggleButton() {
+  const isLight = document.body.classList.contains('theme-light');
+  const icon = document.getElementById('theme-toggle-icon');
+  const label = document.getElementById('theme-toggle-label');
+  if (icon) icon.textContent = isLight ? '☀' : '☾';
+  if (label) label.textContent = isLight ? 'Light' : 'Dark';
+}
+</script>
+</body>
+</html>

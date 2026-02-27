@@ -1,0 +1,12 @@
+{
+  "name": "faithlens",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "wrangler pages dev . --compatibility-date=2025-01-01"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
+

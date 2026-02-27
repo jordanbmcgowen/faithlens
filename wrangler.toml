@@ -1,0 +1,7 @@
+name = "faithlens"
+compatibility_date = "2025-01-01"
+
+[vars]
+# Value is overridden locally by .dev.vars; this just declares the binding.
+ANTHROPIC_API_KEY = ""
+
